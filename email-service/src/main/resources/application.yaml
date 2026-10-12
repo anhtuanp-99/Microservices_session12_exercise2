@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: email-service
+
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: email-service-group    # ← GROUP 2 (khác inventory)
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "com.pharmacy.*"
+        spring.json.value.default.type: com.pharmacy.emailservice.event.OrderCreatedEvent
+        spring.json.use.type.headers: false
+    listener:
+      ack-mode: record
+      concurrency: 3
+
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+
+server:
+  port: 8089
+
+app:
+  kafka:
+    topic:
+      order-events: order-events
+  notification:
+    email-enabled: false
